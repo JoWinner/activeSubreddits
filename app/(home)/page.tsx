@@ -165,7 +165,7 @@ export default function Home() {
             {/* Mobile Ad Space */}
             <Card className="md:hidden p-4">
               <div className="w-full h-[200px] flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                <p className="text-muted-foreground">Ad Space</p>
+                <p className="text-muted-foreground">Ad Space (email us)</p>
               </div>
             </Card>
           </div>
@@ -173,7 +173,7 @@ export default function Home() {
           {/* Right Sidebar - Ad Space */}
           <Card className="hidden md:block p-4 h-[600px]">
             <div className="w-full h-full flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-              <p className="text-muted-foreground">Ad Space</p>
+              <p className="text-muted-foreground">Ad Space (email us)</p>
             </div>
           </Card>
         </div>

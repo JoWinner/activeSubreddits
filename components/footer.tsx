@@ -10,14 +10,14 @@ export const Footer = () => (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="">
-  <h4 className="text-lg font-semibold" > Tabinet </h4>
-  <Image
+  {/* <h4 className="text-lg font-semibold" > Tabinet </h4> */}
+  {/* <Image
   src="/images/tabinet-logo.svg"
   alt="Tabinet Logo"
   width={20}
   height={20}
   className="h-16 w-16"
-/>
+/> */}
          {/* <p className="text-sm text-muted-foreground">
             Transform your browsing experience with powerful split-screen
             capabilities.
@@ -45,7 +45,7 @@ export const Footer = () => (
           </ul>
         </div> */}
 
-        <div className="space-y-4">
+        {/* <div className="space-y-4">
           <h4 className="text-lg font-semibold">Legal</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
@@ -55,7 +55,7 @@ export const Footer = () => (
               <TermsModal />
             </li>
           </ul>
-        </div>
+        </div> */}
 
         <div className="space-y-4">
           <h4 className="text-lg font-semibold">Connect</h4>
@@ -95,7 +95,7 @@ export const Footer = () => (
       </div>
 
       <div className="mt-8 pt-8 border-t border-border/40 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} Tabinet. All rights reserved.
+        © {new Date().getFullYear()} Redditors Online. All rights reserved.
       </div>
     </div>
   </div>
