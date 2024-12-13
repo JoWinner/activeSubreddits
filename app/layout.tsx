@@ -52,15 +52,16 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head />
       <body className={inter.className}>
-        <ThemeProvider
+        {/* <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          // defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
-        >
+        > */}
           {children}
           <Footer/>
-        </ThemeProvider>
+          <script defer src="https://cloud.umami.is/script.js" data-website-id="f5011538-9f13-490d-828d-0b60eabc8e48"></script>
+        {/* </ThemeProvider> */}
       </body>
     </html>
   );

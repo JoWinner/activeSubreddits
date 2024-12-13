@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import base64 from 'base-64';
 
 const SubredditSearchSchema = z.object({
   data: z.object({
@@ -25,17 +26,42 @@ const SubredditSchema = z.object({
   }),
 });
 
+async function getAccessToken() {
+  const clientId = 'YE_EDPw7Xeaqtpmwsoa9bg';
+  const clientSecret = 'u78b_NmIK_i84_RFL23Zevuc_giTrQ';
+  const authString = base64.encode(`${clientId}:${clientSecret}`);
+
+  const response = await fetch('https://www.reddit.com/api/v1/access_token', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Basic ${authString}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: 'grant_type=client_credentials',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to get access token: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.access_token;
+}
+
 export async function fetchSubredditData(searchTerm: string, after?: string) {
   try {
-    const searchUrl = new URL("https://www.reddit.com/subreddits/search.json");
+    const accessToken = await getAccessToken();
+
+    const searchUrl = new URL("https://oauth.reddit.com/subreddits/search");
     searchUrl.searchParams.append("q", searchTerm);
-    searchUrl.searchParams.append("limit", "25");
+    searchUrl.searchParams.append("limit", "100");
     if (after) {
       searchUrl.searchParams.append("after", after);
     }
 
     const searchResponse = await fetch(searchUrl.toString(), {
       headers: {
+        "Authorization": `Bearer ${accessToken}`,
         "User-Agent": "MyRedditApp/1.0.0",
       },
     });
@@ -59,9 +85,10 @@ export async function fetchSubredditData(searchTerm: string, after?: string) {
         const subredditName = child.data.display_name;
         try {
           const response = await fetch(
-            `https://www.reddit.com/r/${subredditName}/about.json`,
+            `https://oauth.reddit.com/r/${subredditName}/about`,
             {
               headers: {
+                "Authorization": `Bearer ${accessToken}`,
                 "User-Agent": "MyRedditApp/1.0.0",
               },
             }
@@ -111,3 +138,4 @@ export async function fetchSubredditData(searchTerm: string, after?: string) {
     );
   }
 }
+

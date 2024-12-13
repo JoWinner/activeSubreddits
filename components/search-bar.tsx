@@ -60,18 +60,18 @@ export function SearchBar({ onSearch }: SearchBarProps) {
           disabled={keywords.length >= 5}
           className="flex-grow"
         />
-        <Button type="submit" disabled={keywords.length >= 5 || !inputValue.trim()}>
+        <Button type="submit" disabled={keywords.length >= 5 || !inputValue.trim()} className="bg-[#FF4500] hover:bg-[#FF5722] text-white">
           Search
         </Button>
       </form>
       {keywords.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {keywords.map((keyword) => (
-            <Badge key={keyword} variant="secondary" className="px-3 py-1">
+            <Badge key={keyword} variant="secondary" className="px-3 py-1 bg-[#0079D3] text-white hover:text-black">
               {keyword}
               <button
                 onClick={() => removeKeyword(keyword)}
-                className="ml-2 hover:text-destructive"
+                className="ml-2 hover:text-red-500"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -82,3 +82,4 @@ export function SearchBar({ onSearch }: SearchBarProps) {
     </div>
   )
 }
+

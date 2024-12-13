@@ -1,6 +1,29 @@
 'use server'
 
 import { z } from 'zod'
+import base64 from 'base-64';
+
+async function getAccessToken() {
+  const clientId = process.env.NEXT_PUBLIC_CLIENT_ID;
+  const clientSecret = process.env.NEXT_PUBLIC_SECRET;
+  const authString = base64.encode(`${clientId}:${clientSecret}`);
+
+  const response = await fetch('https://www.reddit.com/api/v1/access_token', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Basic ${authString}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: 'grant_type=client_credentials',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to get access token: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.access_token;
+}
 
 const SubredditListSchema = z.object({
   data: z.object({
@@ -25,8 +48,11 @@ const SubredditSchema = z.object({
 
 export async function fetchTopSubreddits() {
   try {
-    const response = await fetch('https://www.reddit.com/subreddits/popular.json?limit=20', {
+    const accessToken = await getAccessToken();
+
+    const response = await fetch('https://oauth.reddit.com/subreddits/popular?limit=20', {
       headers: {
+        'Authorization': `Bearer ${accessToken}`,
         'User-Agent': 'MyRedditApp/1.0.0',
       },
     })
@@ -42,8 +68,9 @@ export async function fetchTopSubreddits() {
       validatedData.data.children.map(async (child) => {
         const subredditName = child.data.display_name
         try {
-          const response = await fetch(`https://www.reddit.com/r/${subredditName}/about.json`, {
+          const response = await fetch(`https://oauth.reddit.com/r/${subredditName}/about`, {
             headers: {
+              'Authorization': `Bearer ${accessToken}`,
               'User-Agent': 'MyRedditApp/1.0.0',
             },
           })
