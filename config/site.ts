@@ -1,6 +1,6 @@
 export const siteConfig = {
-    name: 'Redditors Online',
-    description: 'A web application that tracks and displays the number of active users across different subreddits in real-time.',
+    name: 'Active Subreddits',
+    description: 'Track active users across different subreddits in real-time.',
     url: 'https://tabinetbrowser.com',
     links: {
         twitter: "https://x.com/jowinner_",

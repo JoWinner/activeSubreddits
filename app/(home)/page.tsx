@@ -112,7 +112,7 @@ export default function Home() {
             <div className="text-center mb-8 flex items-center justify-center">
               <Logo />
               <h1 className="text-4xl font-bold ml-2 text-[#FF4500] dark:text-[#FF4500]">
-                Reddit Users Online
+                Redditors Online
               </h1>
             </div>
             <p className="text-center text-[#1c1c1c] dark:text-[#D7DADC] mb-4">
