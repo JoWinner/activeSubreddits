@@ -11,12 +11,14 @@ import { Card } from "@/components/ui/card"
 import { AdCard } from '@/components/ad-card'
 import { Logo } from '@/components/logo'
 import { mockAds } from '@/data/ads-data'
+import Link from "next/link";
 
 interface SubredditData {
   name: string;
   activeUsers: number;
   subscribers: number;
 }
+const ORDER_LICENSE_LINK = process.env.NEXT_PUBLIC_ORDER_LICENSE_URL || "";
 
 export default function Home() {
   const [subredditData, setSubredditData] = useState<SubredditData[]>([]);
@@ -114,6 +116,10 @@ export default function Home() {
               <h1 className="text-4xl font-bold ml-2 text-[#FF4500] dark:text-[#FF4500]">
                 Redditors Online
               </h1>
+             
+            </div>
+            <div className="bg-green-500 flex mx-auto  py-2 px-4 border border-gray-300 rounded-full w-fit text-white">
+              <Link href={ORDER_LICENSE_LINK} passHref target="_blank" className="hover:underline">Get Featured!</Link>
             </div>
             <p className="text-center text-[#1c1c1c] dark:text-[#D7DADC] mb-4">
               Track active users across different subreddits in real-time

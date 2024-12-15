@@ -5,6 +5,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import Link from "next/link";
 
 export function GetFeaturedModal() {
   return (
@@ -32,12 +33,16 @@ export function GetFeaturedModal() {
             <section>
               <h2 className="text-lg font-semibold mb-2">2. How to Apply</h2>
               <ul className="list-disc pl-5 space-y-2">
-                <li>Purchase a Tabinet license from our official website.</li>
+                <li>You can purchase a Tabinet license from our official 
+                  <Link href="https://tabinetbrowser.com" passHref target="_blank" className="hover:underline text-blue-500">
+                    website</Link>
+                  </li>
                 <li>Email your featuring materials to <strong>hello@tabinetbrowser.com</strong>, including:
                   <ul className="list-disc pl-5 mt-2">
                     <li>Product/service image</li>
                     <li>Title of your product/service</li>
                     <li>Short description (up to 150 words)</li>
+                    <li>Tagline</li>
                     <li>Link to your website or service page</li>
                   </ul>
                 </li>
