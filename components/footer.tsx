@@ -17,7 +17,7 @@ export const Footer = () => (
   className="h-16 w-16"
 /></Link>
           <p className="text-sm text-muted-foreground">
-          Track active users across different subreddits in real-time and time your posts!
+          Track active users across different subreddits in real-time for free and time your posts!
 
 </p>
         </div>
