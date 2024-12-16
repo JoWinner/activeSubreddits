@@ -7,7 +7,7 @@ export const Footer = () => (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="">
-        <h4 className="text-lg font-semibold" > Active Subreddits</h4>
+        <h4 className="text-lg font-semibold" > Redditors Online</h4>
         <Link href="/">
    <Image
   src="/images/logo.svg"
@@ -26,7 +26,7 @@ export const Footer = () => (
           <h4 className="text-lg font-semibold">Resources</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
-              <a href="https://cloud.umami.is/share/4hoAAWlkdjGJ9oD2/activereddits.com" 
+              <a href="https://cloud.umami.is/share/pwTG1tlfwJ22QAjl/redditors.online" 
               className="hover:text-primary">
                 View Analytics
               </a>
@@ -65,7 +65,7 @@ export const Footer = () => (
       </div>
 
       <div className="mt-8 pt-8 border-t border-border/40 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} Active Subreddits. All rights reserved.
+        © {new Date().getFullYear()} Redditors Online. All rights reserved.
       </div>
     </div>
   </div>

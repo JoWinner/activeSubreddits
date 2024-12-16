@@ -26,7 +26,7 @@ export function GetFeaturedModal() {
             <section>
               <h2 className="text-lg font-semibold mb-2">1. About the Feature Program</h2>
               <p>
-                As a valued Tabinet license holder, you have the chance to feature your product or service on Active Redditors’ website. This offers premium visibility to a highly targeted audience.
+                As a valued Tabinet license holder, you have the chance to feature your product or service on Redditors Online website. This offers premium visibility to a highly targeted audience.
               </p>
             </section>
 

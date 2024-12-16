@@ -1,12 +1,12 @@
 export const siteConfig = {
-    name: 'Active Subreddits',
-    description: 'Track active users across different subreddits in real-time for free.',
-    url: 'https://tabinetbrowser.com',
+    name: ' Redditors Online',
+    description: 'Track active users online across different subreddits in real-time for free.',
+    url: 'https://www.redditors.online',
     links: {
         twitter: "https://x.com/jowinner_",
-        github: "https://github.com/JoWinner/tabinerbrowser",
+        // github: "https://github.com/JoWinner/tabinerbrowser",
     },
-    ogImage: 'https://active-subreddits.vercel.app/og-image.jpg',
+    ogImage: 'https://www.redditors.online/og-image.jpg',
     twitter: {
         card: 'summary_large_image',
         creator: '@jowinner_'
