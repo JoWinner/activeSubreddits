@@ -71,7 +71,7 @@ export function SubredditTable({ data, isLoading }: SubredditTableProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {isLoading && data.length === 0 ? (
+      {isLoading ? (
           Array.from({ length: 5 }).map((_, index) => (
             <TableRow key={index}>
               <TableCell><Skeleton className="h-4 w-[30px]" /></TableCell>
@@ -80,6 +80,12 @@ export function SubredditTable({ data, isLoading }: SubredditTableProps) {
               <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
             </TableRow>
           ))
+        ) : sortedData.length === 0 ? (
+          <TableRow>
+            <TableCell colSpan={4} className="text-center text-muted-foreground">
+              No results found
+            </TableCell>
+          </TableRow>
         ) : (
           sortedData.map((item, index) => (
             <TableRow key={item.name} className="hover:bg-[#F6F7F8] dark:hover:bg-[#272729]">

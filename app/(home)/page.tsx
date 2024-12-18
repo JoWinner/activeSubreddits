@@ -24,13 +24,17 @@ export default function Home() {
   const [subredditData, setSubredditData] = useState<SubredditData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSearchLoading, setIsSearchLoading] = useState(false); 
 
+ 
   useEffect(() => {
     async function loadTopSubreddits() {
       try {
         setIsLoading(true);
         setError(null);
-        const topSubreddits = await fetchTopSubreddits();
+        // const topSubreddits = await fetchTopSubreddits();
+        const topSubreddits = (await fetchTopSubreddits()) ?? [];
+
         setSubredditData(topSubreddits.filter(subreddit => subreddit.activeUsers > 0).slice(0, 20));
       } catch (err) {
         console.error("Error loading top subreddits:", err);
@@ -48,9 +52,30 @@ export default function Home() {
   }, []);
 
   const handleSearch = async (keywords: string[]) => {
+    setIsSearchLoading(true); // Set search loading state
+    setError(null);
+
     if (keywords.length === 0) {
-      const topSubreddits = await fetchTopSubreddits();
+      // const topSubreddits = await fetchTopSubreddits();
+      const topSubreddits = (await fetchTopSubreddits()) ?? [];
+
       setSubredditData(topSubreddits.filter(subreddit => subreddit.activeUsers > 0).slice(0, 20));
+      try {
+        // const topSubreddits = await fetchTopSubreddits();
+        const topSubreddits = (await fetchTopSubreddits()) ?? [];
+
+        setSubredditData(topSubreddits.filter(subreddit => subreddit.activeUsers > 0).slice(0, 20));
+      } catch (err) {
+        console.error("Error loading top subreddits:", err);
+        setError(
+          `Failed to load top subreddits: ${
+            err instanceof Error ? err.message : "Unknown error"
+          }`
+        );
+        setSubredditData([]);
+      } finally {
+        setIsSearchLoading(false); // Reset search loading state
+      }
       return;
     }
 
@@ -93,8 +118,10 @@ export default function Home() {
       setSubredditData([]);
     } finally {
       setIsLoading(false);
+      setIsSearchLoading(false); // Reset search loading state
     }
   };
+
 
   return (
     <div className="min-h-screen bg-[#DAE0E6] dark:bg-[#030303]">
@@ -135,8 +162,8 @@ export default function Home() {
             )}
 
             <div className="bg-[#FFFFFF] dark:bg-[#1A1A1B] rounded-lg shadow">
-              <SubredditTable data={subredditData} isLoading={isLoading} />
-            </div>
+             <SubredditTable data={subredditData} isLoading={isLoading || isSearchLoading} /> 
+                       </div>
 
             {/* Mobile Ad Space */}
             <Card className="md:hidden p-4">
