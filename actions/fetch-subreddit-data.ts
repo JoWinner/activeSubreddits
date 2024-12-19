@@ -9,7 +9,8 @@ const SubredditSearchSchema = z.object({
       z.object({
         data: z.object({
           display_name: z.string(),
-          subscribers: z.number().nullable().default(0), // Allow null subscribers
+          subscribers: z.number().nullable().default(0),
+          subreddit_type: z.string(),
         }),
       })
     ),
@@ -22,23 +23,19 @@ const SubredditSchema = z.object({
   data: z.object({
     active_user_count: z.number().nullable(),
     display_name: z.string(),
-    subscribers: z.number().nullable().default(0), // Allow null subscribers
+    subscribers: z.number().nullable().default(0),
   }),
 });
 
-let accessToken: string | null = null;
-let tokenExpiration: number = 0;
-
-async function getAccessToken() {
-  const currentTime = Date.now();
-  
-  // Check if token exists and is not expired (with 5-minute buffer)
-  if (accessToken && tokenExpiration > currentTime + 300000) {
-    return accessToken;
-  }
-
+// Remove global token storage
+async function getAccessToken(): Promise<string> {
   const clientId = process.env.NEXT_PUBLIC_CLIENT_ID;
   const clientSecret = process.env.NEXT_PUBLIC_CLIENT_SECRET;
+  
+  if (!clientId || !clientSecret) {
+    throw new Error('Missing Reddit API credentials');
+  }
+
   const authString = base64.encode(`${clientId}:${clientSecret}`);
 
   try {
@@ -47,8 +44,10 @@ async function getAccessToken() {
       headers: {
         'Authorization': `Basic ${authString}`,
         'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'MyRedditApp/1.0.0',
       },
       body: 'grant_type=client_credentials',
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -56,63 +55,84 @@ async function getAccessToken() {
     }
 
     const data = await response.json();
-    accessToken = data.access_token;
-    // Set expiration to current time + expires_in (in milliseconds) - 5 minute buffer
-    tokenExpiration = currentTime + (data.expires_in * 1000) - 300000;
-    return accessToken;
+    return data.access_token;
   } catch (error) {
     console.error('Error getting access token:', error);
     throw new Error('Failed to authenticate with Reddit API');
   }
 }
 
-async function fetchWithRetry(url: string, options: RequestInit, retries = 3) {
+async function wait(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function fetchWithRetry(url: string, options: RequestInit, retries = 3): Promise<Response | null> {
+  let lastError: Error | null = null;
+  let token: string;
+  
   for (let i = 0; i < retries; i++) {
     try {
-      const response = await fetch(url, options);
+      // Get a fresh token for each retry
+      token = await getAccessToken();
       
-      if (response.status === 401 && i < retries - 1) {
-        // Clear token and try to get a new one
-        accessToken = null;
-        const newToken = await getAccessToken();
-        options.headers = {
-          ...options.headers,
-          'Authorization': `Bearer ${newToken}`,
-        };
-        continue;
+      // Update headers with new token
+      options.headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`,
+        'User-Agent': 'MyRedditApp/1.0.0',
+      };
+
+      // Add delay between retries
+      if (i > 0) {
+        await wait(Math.pow(2, i) * 1000);
       }
 
-      if (!response.ok) {
-        throw new Error(`${response.status} ${response.statusText}`);
+      const response = await fetch(url, {
+        ...options,
+        cache: 'no-store',
+      });
+
+      if (response.status === 404) {
+        return null;
       }
 
-      return response;
+      if (response.ok) {
+        return response;
+      }
+
+      // For other status codes, throw an error
+      throw new Error(`HTTP ${response.status} ${response.statusText}`);
     } catch (error) {
-      if (i === retries - 1) throw error;
-      // Wait for 1 second before retrying
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.error(`Attempt ${i + 1} failed:`, lastError);
+      
+      if (i === retries - 1) {
+        throw lastError;
+      }
     }
   }
-  throw new Error('Max retries reached');
+  
+  throw lastError || new Error('Max retries reached');
 }
 
 export async function fetchSubredditData(searchTerm: string, after?: string) {
   try {
-    const token = await getAccessToken();
-
     const searchUrl = new URL("https://oauth.reddit.com/subreddits/search");
     searchUrl.searchParams.append("q", searchTerm);
-    searchUrl.searchParams.append("limit", "100");
+    searchUrl.searchParams.append("limit", "25");
+    searchUrl.searchParams.append("type", "sr");
     if (after) {
       searchUrl.searchParams.append("after", after);
     }
 
     const searchResponse = await fetchWithRetry(searchUrl.toString(), {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "User-Agent": "MyRedditApp/1.0.0",
-      },
+      method: 'GET',
+      cache: 'no-store',
     });
+
+    if (!searchResponse) {
+      return { data: [], hasMore: false, nextPage: null };
+    }
 
     const searchData = await searchResponse.json();
     const validatedSearchData = SubredditSearchSchema.parse(searchData);
@@ -120,45 +140,64 @@ export async function fetchSubredditData(searchTerm: string, after?: string) {
     const filteredSubreddits = validatedSearchData.data.children.filter(
       (child) => {
         const name = child.data.display_name.toLowerCase();
-        return name.includes(searchTerm.toLowerCase()) && !name.startsWith('u/');
+        return (
+          name.includes(searchTerm.toLowerCase()) &&
+          !name.startsWith('u_') &&
+          !name.startsWith('u/') &&
+          child.data.subreddit_type !== 'user'
+        );
       }
     );
 
-    const subredditsWithCounts = await Promise.all(
-      filteredSubreddits.map(async (child) => {
-        const subredditName = child.data.display_name;
-        try {
-          const response = await fetchWithRetry(
-            `https://oauth.reddit.com/r/${subredditName}/about`,
-            {
-              headers: {
-                "Authorization": `Bearer ${token}`,
-                "User-Agent": "MyRedditApp/1.0.0",
-              },
+    // Process subreddits in batches
+    const batchSize = 5;
+    const results: Array<{
+      name: string;
+      activeUsers: number;
+      subscribers: number;
+    }> = [];
+
+    for (let i = 0; i < filteredSubreddits.length; i += batchSize) {
+      const batch = filteredSubreddits.slice(i, i + batchSize);
+      
+      await wait(1000); // Wait between batches
+      
+      const batchResults = await Promise.all(
+        batch.map(async (child) => {
+          const subredditName = child.data.display_name;
+          try {
+            const response = await fetchWithRetry(
+              `https://oauth.reddit.com/r/${subredditName}/about`,
+              {
+                method: 'GET',
+                cache: 'no-store',
+              }
+            );
+
+            if (!response) {
+              return null;
             }
-          );
 
-          const subredditData = await response.json();
-          const validatedSubreddit = SubredditSchema.parse(subredditData);
+            const subredditData = await response.json();
+            const validatedSubreddit = SubredditSchema.parse(subredditData);
 
-          return {
-            name: validatedSubreddit.data.display_name,
-            activeUsers: validatedSubreddit.data.active_user_count ?? 0,
-            subscribers: validatedSubreddit.data.subscribers ?? 0,
-          };
-        } catch (error) {
-          console.error(`Error fetching data for ${subredditName}:`, error);
-          return {
-            name: subredditName,
-            activeUsers: 0,
-            subscribers: child.data.subscribers ?? 0,
-          };
-        }
-      })
-    );
+            return {
+              name: validatedSubreddit.data.display_name,
+              activeUsers: validatedSubreddit.data.active_user_count ?? 0,
+              subscribers: validatedSubreddit.data.subscribers ?? 0,
+            };
+          } catch (error) {
+            console.error(`Error fetching data for ${subredditName}:`, error);
+            return null;
+          }
+        })
+      );
+
+      results.push(...batchResults.filter((item): item is NonNullable<typeof item> => item !== null));
+    }
 
     return {
-      data: subredditsWithCounts,
+      data: results,
       hasMore: validatedSearchData.data.after !== null,
       nextPage: validatedSearchData.data.after,
     };
@@ -171,4 +210,3 @@ export async function fetchSubredditData(searchTerm: string, after?: string) {
     );
   }
 }
-
