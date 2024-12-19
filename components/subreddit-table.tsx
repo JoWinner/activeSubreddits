@@ -63,7 +63,7 @@ export function SubredditTable({ data, isLoading }: SubredditTableProps) {
             Subreddit <SortIcon column="name" />
           </TableHead>
           <TableHead className="cursor-pointer text-[#1c1c1c] dark:text-[#D7DADC]" onClick={() => handleSort('activeUsers')}>
-            Active Users <SortIcon column="activeUsers" />
+            Users Online <SortIcon column="activeUsers" />
           </TableHead>
           <TableHead className="cursor-pointer text-[#1c1c1c] dark:text-[#D7DADC]" onClick={() => handleSort('subscribers')}>
             Subscribers <SortIcon column="subscribers" />
@@ -91,7 +91,11 @@ export function SubredditTable({ data, isLoading }: SubredditTableProps) {
             <TableRow key={item.name} className="hover:bg-[#F6F7F8] dark:hover:bg-[#272729]">
               <TableCell className="text-[#1c1c1c] dark:text-[#D7DADC]">{index + 1}</TableCell>
               <TableCell className="text-[#0079D3] dark:text-[#4FBCFF] font-medium">{item.name}</TableCell>
-              <TableCell className="text-[#1c1c1c] dark:text-[#D7DADC]">{item.activeUsers.toLocaleString()}</TableCell>
+              <TableCell className="text-white ">
+                <span className='bg-green-500 dark:bg-green-700 rounded-full w-fit py-1 px-2'>
+                {item.activeUsers.toLocaleString()}
+                </span>
+              </TableCell>
               <TableCell className="text-[#1c1c1c] dark:text-[#D7DADC]">{item.subscribers.toLocaleString()}</TableCell>
             </TableRow>
           ))

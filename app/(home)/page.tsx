@@ -145,7 +145,7 @@ export default function Home() {
               </h1>
              
             </div>
-            <div className="bg-green-500 flex mx-auto  py-2 px-4 border border-gray-300 rounded-full w-fit text-white">
+            <div className="bg-green-500 dark:bg-green-700 flex mx-auto  py-2 px-4 border border-gray-300 rounded-full w-fit text-white">
               <Link href={ORDER_LICENSE_LINK} passHref target="_blank" className="hover:underline">Get Featured!</Link>
             </div>
             <p className="text-center text-[#1c1c1c] dark:text-[#D7DADC] mb-4">
